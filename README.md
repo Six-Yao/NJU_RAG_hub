@@ -31,14 +31,6 @@ NJU_RAG_hub_new/
 4. **增强模块化**：关键词提取、时间重写、任务意图扩写等能力收敛到 `tools/`，避免散落。
 5. **单一入口**：`python -m main ingest/query/eval` 即可完成常见操作，降低上手成本。
 
-### 当前进度
-
-- [x] `config.py` 暴露 `Settings`/`load_settings`。
-- [x] `pipeline/` 已迁移语义切分、索引构建与路由。
-- [x] `standard_rag.py` 对齐 llama-index 实现，GraphRAG / LightRAG 仍为占位。
-- [x] `scripts/evaluate.py` 整合 RAGAS + 关键词日志。
-- [x] `requirements.txt` 精简依赖。
-
 ### 运行方式
 
 ```powershell
@@ -63,3 +55,21 @@ python main.py eval --limit 20 --output results.csv
 	其余可选项：`EMBEDDING_BASE_URL`、`LLM_BASE_URL`、`SIMILARITY_TOP_K`、`ANSWER_CONTEXT_K`、`ENABLE_FOCUS_HINTS`、`ENABLE_TIME_FILTERS`、`LLM_TEMPERATURE` 等。
 2. 执行 `pip install -r requirements.txt` 安装依赖。
 3. 若需本地数据库/向量库，请确保 `sqlite_db/` 与 `chroma_db/` 目录可写，或在 `.env` 中指向自定义路径。
+
+### 协作成员更新指引
+
+#### 添加新的 RAG 架构
+- 在 `rag_architectures/` 下创建 `xxx_rag.py`，继承 `pipeline.base_rag.BaseRAG` 并实现 `query`/`async_query`，按需复用 `pipeline.ingest`、`tools/` 中的能力。
+- 在 `rag_architectures/__init__.py` 中导出新类，保持 `__all__` 可读。
+- 在 `pipeline/query_router.py` 末尾通过 `register_architecture("xxx", lambda settings: XXXRAG(settings=settings))` 注册，命名与 CLI `--arch` 参数保持一致。
+- 如需额外配置，先在 `config.Settings` 内添加字段并设置默认值，再在 `.env`/环境变量中提供实际参数。
+- 运行 `python main.py query "test" --arch xxx` 做一次冒烟验证，必要时补充评测：`python main.py eval --arch xxx`。
+- 如果看不懂就让copilot代打吧
+
+#### 添加新的工具模块（如关键词/时间/信息抽取）
+- 在 `tools/` 下创建独立模块（例：`tools/my_feature.py`），保持纯函数或轻量类，避免直接依赖 CLI 参数。
+- 若工具在 ingest 阶段使用（例如写入额外元数据），从 `pipeline.ingest` 导入并在 `_apply_temporal_metadata` 或相应流程中调用。
+- 若工具在查询阶段使用，在对应的 RAG 类（如 `rag_architectures/standard_rag.py`）中导入，确保异常被捕获并打印 `logger.warning`，避免中断查询。
+- 如工具需要配置开关或阈值，统一放在 `config.Settings` 中，并在 README/注释内写明用途。
+- 撰写最小示例或单元脚本（可放在 `scripts/` 或 `notebooks/`），方便其他成员复现与验证。
+- 如果看不懂就让copilot代打吧
