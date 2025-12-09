@@ -195,10 +195,15 @@ def run_evaluation(
 		raise_exceptions=False,
 	)
 
-	if hasattr(dataset_schema.EvaluationResult, "model_validate"):
-		result = dataset_schema.EvaluationResult.model_validate(evaluation)
-	else:  # pragma: no cover - legacy pydantic v1
-		result = dataset_schema.EvaluationResult.parse_obj(evaluation)
+	result_cls = dataset_schema.EvaluationResult
+	if isinstance(evaluation, result_cls):
+		result = evaluation
+	elif hasattr(result_cls, "model_validate"):
+		result = result_cls.model_validate(evaluation)
+	elif hasattr(result_cls, "parse_obj"):
+		result = result_cls.parse_obj(evaluation)  # pragma: no cover - legacy pydantic v1
+	else:
+		result = result_cls(**evaluation)
 	df = result.to_pandas().reset_index(drop=True)
 	expected = len(keyword_logs)
 	if len(df) != expected:
