@@ -5,9 +5,9 @@ import argparse
 import json
 from typing import Sequence
 
-from .pipeline.ingest import run_ingest
-from .pipeline.query_router import available_architectures, build_rag
-from .scripts.evaluate import run_evaluation
+from pipeline.ingest import run_ingest
+from pipeline.query_router import available_architectures, build_rag
+from scripts.evaluate import run_evaluation
 
 
 def _handle_ingest(args: argparse.Namespace) -> None:

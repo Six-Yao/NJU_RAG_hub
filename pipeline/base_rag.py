@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
-from ..config import Settings, load_settings
+from config import Settings, load_settings
 
 
 class BaseRAG(ABC):
