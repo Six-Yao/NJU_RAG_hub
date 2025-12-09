@@ -18,8 +18,8 @@ from openai import OpenAI
 from ragas import dataset_schema, evaluate
 from ragas.metrics import answer_relevancy, context_precision, context_recall, faithfulness
 
-from ..config import load_settings
-from ..pipeline.query_router import build_rag
+from config import load_settings
+from pipeline.query_router import build_rag
 
 
 class SingleResponseChatModel(BaseChatModel):
@@ -195,7 +195,10 @@ def run_evaluation(
 		raise_exceptions=False,
 	)
 
-	result = dataset_schema.EvaluationResult.parse_obj(evaluation)
+	if hasattr(dataset_schema.EvaluationResult, "model_validate"):
+		result = dataset_schema.EvaluationResult.model_validate(evaluation)
+	else:  # pragma: no cover - legacy pydantic v1
+		result = dataset_schema.EvaluationResult.parse_obj(evaluation)
 	df = result.to_pandas().reset_index(drop=True)
 	expected = len(keyword_logs)
 	if len(df) != expected:

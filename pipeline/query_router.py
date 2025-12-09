@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List, Optional
 
-from ..config import Settings, load_settings
-from .base_rag import BaseRAG
+from config import Settings, load_settings
+from pipeline.base_rag import BaseRAG
 
 Builder = Callable[[Optional[Settings]], BaseRAG]
 _ARCHITECTURE_BUILDERS: Dict[str, Builder] = {}
@@ -29,7 +29,7 @@ def build_rag(name: str = "standard", settings: Optional[Settings] = None) -> Ba
 
 
 # 延迟注册，避免循环依赖
-from ..rag_architectures.standard_rag import StandardRAG  # noqa: E402
+from rag_architectures.standard_rag import StandardRAG  # noqa: E402
 
 register_architecture(StandardRAG.name, lambda settings: StandardRAG(settings=settings))
 

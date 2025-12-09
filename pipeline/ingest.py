@@ -12,10 +12,10 @@ from llama_index.core.schema import BaseNode, TextNode
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
-from ..config import Settings, load_settings
-from ..tools.temporal import extract_temporal_metadata
-from .chunking import semantic_split
-from .embeddings import OpenRouterEmbedding
+from config import Settings, load_settings
+from tools.temporal import extract_temporal_metadata
+from pipeline.chunking import semantic_split
+from pipeline.embeddings import OpenRouterEmbedding
 
 logger = logging.getLogger(__name__)
 _METADATA_BATCH_SIZE = 512
