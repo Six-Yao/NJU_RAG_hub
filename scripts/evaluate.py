@@ -127,8 +127,6 @@ def run_evaluation(
 	answers: List[str] = []
 	contexts: List[List[str]] = []
 	keyword_logs: List[str] = []
-	llm_keyword_logs: List[str] = []
-	heuristic_keyword_logs: List[str] = []
 	valid_indices: List[int] = []
 
 	for idx, question in enumerate(questions):
@@ -142,8 +140,6 @@ def run_evaluation(
 		answers.append(result.get("answer", ""))
 		contexts.append([source.get("content", "") for source in result.get("sources", [])])
 		combined_keywords = result.get("keywords")
-		llm_keywords = result.get("llm_keywords")
-		heuristic_keywords = result.get("heuristic_keywords")
 
 		def _serialize_terms(value: Any) -> str:
 			if isinstance(value, str):
@@ -153,8 +149,6 @@ def run_evaluation(
 			return ""
 
 		keyword_logs.append(_serialize_terms(combined_keywords))
-		llm_keyword_logs.append(_serialize_terms(llm_keywords))
-		heuristic_keyword_logs.append(_serialize_terms(heuristic_keywords))
 		valid_indices.append(idx)
 
 	if not answers:
@@ -210,12 +204,8 @@ def run_evaluation(
 		min_len = min(len(df), expected)
 		df = df.iloc[:min_len].reset_index(drop=True)
 		keyword_logs = keyword_logs[:min_len]
-		llm_keyword_logs = llm_keyword_logs[:min_len]
-		heuristic_keyword_logs = heuristic_keyword_logs[:min_len]
 
 	df["keywords"] = keyword_logs
-	df["llm_keywords"] = llm_keyword_logs
-	df["heuristic_keywords"] = heuristic_keyword_logs
 	output_path = Path(output).resolve()
 	df.to_csv(output_path, index=False)
 
